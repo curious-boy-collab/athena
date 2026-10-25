@@ -262,3 +262,25 @@ body {
   height: 17px;
   accent-color: #263c53;
 }
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.navigation-buttons button {
+  padding: 11px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #263c53;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.navigation-buttons button:disabled {
+  background: #c2c7cd;
+  cursor: not-allowed;
+}

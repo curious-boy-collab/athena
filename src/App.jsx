@@ -133,6 +133,21 @@ function App() {
                 </label>
               ))}
             </div>
+            <div className="navigation-buttons">
+              <button
+                onClick={() => setQuestionIndex((index) => index - 1)}
+                disabled={questionIndex === 0}
+              >
+                Previous
+              </button>
+              {questionIndex === questions.length - 1 ? (
+                <button onClick={finishTest}>Submit answers</button>
+              ) : (
+                <button onClick={() => setQuestionIndex((index) => index + 1)}>
+                  Next
+                </button>
+              )}
+            </div>
           </section>
         </div>
       </main>
