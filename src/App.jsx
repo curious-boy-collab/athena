@@ -26,21 +26,16 @@ const questions = [
 
 function App() {
   const videoRef = useRef(null);
-  const [cameraReady, setCameraReady] = useState(false);
+
   const [time, setTime] = useState(0);
   const [started, setStarted] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [captureMessage, setCaptureMessage] = useState("");
   const [captureDirectory, setCaptureDirectory] = useState("");
-
-  function selectAnswer(answer) {
-    setAnswers((currentAnswers) => ({
-      ...currentAnswers,
-      [questionIndex]: answer,
-    }));
-  }
+  const [cameraPermissionBlocked, setCameraPermissionBlocked] = useState(false);
 
   async function getElapsedTime() {
     const currTime = await window.electronAPI.getRemainingTime();
@@ -55,25 +50,54 @@ function App() {
     return () => clearInterval(interval);
   }, [started]);
 
-  function finishTest() {
-    setSubmitted(true);
-    setStarted(false);
+  async function getCamera() {
+    let videoData;
+    try {
+      setCameraPermissionBlocked(false);
+      const permission = await window.electronAPI.requestCameraAccess();
+      if (!permission.granted) {
+        setCameraPermissionBlocked(true);
+        throw new Error(
+          `macOS camera access is ${permission.status}. Enable camera access for Electron in System Settings > Privacy & Security > Camera, then try again.`,
+        );
+      }
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("Camera access is not available in this app environment.");
+      }
+
+      videoData = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+
+      if (!videoRef.current) {
+        throw new Error("Camera preview is not ready.");
+      }
+
+      videoRef.current.srcObject = videoData;
+      await videoRef.current.play();
+
+      setCameraReady(true);
+      setCaptureMessage("");
+    } catch (error) {
+      videoData?.getTracks().forEach((track) => track.stop());
+      setCaptureMessage(`Could not access the camera: ${error.message}`);
+    }
   }
 
-  function formatTimeLeft(ms) {
-    const seconds = Math.floor((ms / 1000) % 60)
-      .toString()
-      .padStart(2, "0");
+  async function openCameraSettings() {
+    if (typeof window.electronAPI?.openCameraSettings !== "function") {
+      setCaptureMessage(
+        "This app window was opened with an older Electron preload. Quit the app completely with Cmd+Q, then start it again with npm start.",
+      );
+      return;
+    }
 
-    const minutes = Math.floor((ms / (1000 * 60)) % 60)
-      .toString()
-      .padStart(2, "0");
-
-    const hours = Math.floor(ms / (1000 * 60 * 60))
-      .toString()
-      .padStart(2, "0");
-
-    return `${hours}:${minutes}:${seconds}`;
+    try {
+      await window.electronAPI.openCameraSettings();
+    } catch (error) {
+      setCaptureMessage(`Could not open camera settings: ${error.message}`);
+    }
   }
 
   async function clickPhoto() {
@@ -128,6 +152,23 @@ function App() {
     };
   }, [started, cameraReady]);
 
+  useEffect(
+    () => () => {
+      videoRef.current?.srcObject?.getTracks().forEach((track) => track.stop());
+    },
+    [],
+  );
+
+  function stopCamera() {
+    videoRef.current?.srcObject?.getTracks().forEach((track) => track.stop());
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCameraReady(false);
+  }
+
+  async function getFullscreen() {
+    await window.electronAPI.setFullScreen();
+  }
+
   async function startTest() {
     const accepted = await window.electronAPI.showExamRules();
     if (accepted !== 1) return;
@@ -137,23 +178,33 @@ function App() {
     setStarted(true);
   }
 
-  async function getFullscreen() {
-    await window.electronAPI.setFullScreen();
+  function formatTimeLeft(ms) {
+    const seconds = Math.floor((ms / 1000) % 60)
+      .toString()
+      .padStart(2, "0");
+
+    const minutes = Math.floor((ms / (1000 * 60)) % 60)
+      .toString()
+      .padStart(2, "0");
+
+    const hours = Math.floor(ms / (1000 * 60 * 60))
+      .toString()
+      .padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
   }
 
-  async function getCamera() {
-    try {
-      const videoData = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = videoData;
-        await videoRef.current.play();
-        setCameraReady(true);
-      }
-    } catch (err) {
-      console.error("Camera access error:", err);
-    }
+  function selectAnswer(answer) {
+    setAnswers((currentAnswers) => ({
+      ...currentAnswers,
+      [questionIndex]: answer,
+    }));
+  }
+
+  function finishTest() {
+    setSubmitted(true);
+    setStarted(false);
+    stopCamera();
   }
 
   if (started || submitted) {
@@ -162,6 +213,7 @@ function App() {
       (total, item, index) => total + (answers[index] === item.answer ? 1 : 0),
       0,
     );
+
     return (
       <main className="exam-page">
         <div className="exam-container">
@@ -169,12 +221,11 @@ function App() {
             <h3>{submitted ? "Quiz complete" : "Multiple-choice quiz"}</h3>
             {!submitted && (
               <div className="exam-header-actions">
-              <span>Time left: {formatTimeLeft(time)}</span>
-              <button onClick={finishTest} className="end-test-btn">
-                Finish quiz
-              </button>
-            </div>
-                        </div>
+                <span>Time left: {formatTimeLeft(time)}</span>
+                <button onClick={finishTest} className="end-test-btn">
+                  Finish quiz
+                </button>
+              </div>
             )}
           </header>
 
@@ -195,41 +246,48 @@ function App() {
               </button>
             </section>
           ) : (
-          <section className="question-card">
-            <h2>
-              Question {questionIndex + 1} of {questions.length}
-            </h2>
-            <p>{questions[questionIndex].prompt}</p>
-            <div role="radiogroup" aria-label={questions[questionIndex].prompt}>
-              {questions[questionIndex].options.map((option) => (
-                <label className="option-row" key={option}>
-                  <input
-                    type="radio"
-                    name={`question-${questionIndex}`}
-                    value={option}
-                    checked={answers[questionIndex] === option}
-                    onChange={() => selectAnswer(option)}
-                  />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </div>
-            <div className="navigation-buttons">
-              <button
-                onClick={() => setQuestionIndex((index) => index - 1)}
-                disabled={questionIndex === 0}
-              >
-                Previous
-              </button>
-              {questionIndex === questions.length - 1 ? (
-                <button onClick={finishTest}>Submit answers</button>
-              ) : (
-                <button onClick={() => setQuestionIndex((index) => index + 1)}>
-                  Next
+            <section className="question-card">
+              <h2>
+                Question {questionIndex + 1} of {questions.length}
+              </h2>
+              <p>{question.prompt}</p>
+              <div role="radiogroup" aria-label={question.prompt}>
+                {question.options.map((option) => (
+                  <label className="option-row" key={option}>
+                    <input
+                      type="radio"
+                      name={`question-${questionIndex}`}
+                      value={option}
+                      checked={answers[questionIndex] === option}
+                      onChange={() => selectAnswer(option)}
+                    />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="navigation-buttons">
+                <button
+                  onClick={() => setQuestionIndex((index) => index - 1)}
+                  disabled={questionIndex === 0}
+                >
+                  Previous
                 </button>
-              )}
-            </div>
-          </section>
+                {questionIndex === questions.length - 1 ? (
+                  <button onClick={finishTest}>Submit answers</button>
+                ) : (
+                  <button onClick={() => setQuestionIndex((index) => index + 1)}>
+                    Next
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+          {captureMessage && <p className="capture-status">{captureMessage}</p>}
+          {captureDirectory && (
+            <p className="capture-status">
+              Camera snapshots are saved locally every 4 seconds in:{" "}
+              {captureDirectory}
+            </p>
           )}
         </div>
       </main>
@@ -242,7 +300,7 @@ function App() {
         ref={videoRef}
         autoPlay
         muted
-        className={cameraReady ? "video-preview" : "hidden-video"}
+        className={cameraReady && !started ? "video-preview" : "hidden-video"}
       />
 
       <div className="page-container">
@@ -264,28 +322,52 @@ function App() {
                 <button onClick={getCamera} className="btn btn-dark">
                   Get Camera Access
                 </button>
+                {cameraPermissionBlocked && (
+                  <button
+                    onClick={openCameraSettings}
+                    className="btn btn-outline"
+                  >
+                    Open Camera Settings
+                  </button>
+                )}
               </div>
+              {cameraReady && <div className="camera-space" />}
             </div>
           </div>
 
           <div className="divider" />
 
+          {/* Fullscreen */}
+
           <div className="permission-item">
             <div className="permission-icon">⛶</div>
+
             <div className="permission-content">
               <h3>Switch to full screen</h3>
+
               <p>Kindly close all tabs and switch to full screen.</p>
-              <button onClick={getFullscreen} className="btn btn-light-blue">Give Full Screen Permissions</button>
+
+              <button onClick={getFullscreen} className="btn btn-light-blue">
+                Give Full Screen Permissions
+              </button>
             </div>
           </div>
         </div>
 
         <div className="bottom-actions">
-          <button onClick={startTest} className="btn btn-light-blue" disabled={!cameraReady}>
+          <button
+            onClick={startTest}
+            className="btn btn-light-blue"
+            disabled={!cameraReady}
+          >
             Go To Test
           </button>
           <button className="btn btn-outline">Need Help?</button>
         </div>
+        {captureDirectory && (
+          <p className="capture-status">Snapshots folder: {captureDirectory}</p>
+        )}
+        {captureMessage && <p className="capture-status">{captureMessage}</p>}
       </div>
     </>
   );

@@ -3,6 +3,7 @@ const {
   app,
   ipcMain,
   dialog,
+  session,
   systemPreferences,
   shell,
 } = require("electron");
@@ -86,5 +87,18 @@ ipcMain.handle("save-photo", (_, arrayBuffer) => {
 });
 
 app.whenReady().then(() => {
+  const allowVideoPermission = (permission, details = {}) =>
+    permission === "media" && details.mediaTypes?.includes("video");
+
+  session.defaultSession.setPermissionCheckHandler(
+    (_webContents, permission, _requestingOrigin, details) =>
+      allowVideoPermission(permission, details),
+  );
+  session.defaultSession.setPermissionRequestHandler(
+    (_webContents, permission, callback, details) => {
+      callback(allowVideoPermission(permission, details));
+    },
+  );
+
   createWindow();
 });
