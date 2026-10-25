@@ -136,3 +136,25 @@ body {
 .btn-outline:hover {
   background: #faf9f7;
 }
+
+.video-preview {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 180px;
+  height: 115px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #111111;
+  z-index: 10;
+}
+
+.hidden-video {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  top: -100px;
+  left: -100px;
+}
