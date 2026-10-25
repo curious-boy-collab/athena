@@ -158,3 +158,18 @@ body {
   top: -100px;
   left: -100px;
 }
+
+.bottom-actions {
+  width: 100%;
+  max-width: 920px;
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  justify-content: flex-start;
+}
+
+.btn:disabled {
+  background: #c2c7cd;
+  cursor: not-allowed;
+  transform: none;
+}

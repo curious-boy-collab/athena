@@ -5,6 +5,10 @@ function App() {
   const videoRef = useRef(null);
   const [cameraReady, setCameraReady] = useState(false);
 
+  async function getFullscreen() {
+    await window.electronAPI.setFullScreen();
+  }
+
   async function getCamera() {
     try {
       const videoData = await navigator.mediaDevices.getUserMedia({
@@ -59,9 +63,16 @@ function App() {
             <div className="permission-content">
               <h3>Switch to full screen</h3>
               <p>Kindly close all tabs and switch to full screen.</p>
-              <button className="btn btn-light-blue">Give Full Screen Permissions</button>
+              <button onClick={getFullscreen} className="btn btn-light-blue">Give Full Screen Permissions</button>
             </div>
           </div>
+        </div>
+
+        <div className="bottom-actions">
+          <button className="btn btn-light-blue" disabled={!cameraReady}>
+            Go To Test
+          </button>
+          <button className="btn btn-outline">Need Help?</button>
         </div>
       </div>
     </>
