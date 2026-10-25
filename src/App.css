@@ -217,3 +217,48 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
+
+.question-card {
+  background: #ffffff;
+  border: 1px solid #e7e4df;
+  border-radius: 12px;
+  padding: 36px 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.025);
+}
+
+.question-card h2 {
+  font-size: 14px;
+  color: #777777;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.question-card > p {
+  font-size: 20px;
+  font-weight: 600;
+  color: #292929;
+  margin-bottom: 26px;
+}
+
+.option-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 1px solid #e6e3df;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+}
+
+.option-row:hover {
+  background: #faf9f7;
+}
+
+.option-row input {
+  width: 17px;
+  height: 17px;
+  accent-color: #263c53;
+}

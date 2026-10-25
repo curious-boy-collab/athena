@@ -29,6 +29,15 @@ function App() {
   const [cameraReady, setCameraReady] = useState(false);
   const [time, setTime] = useState(0);
   const [started, setStarted] = useState(false);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
+
+  function selectAnswer(answer) {
+    setAnswers((currentAnswers) => ({
+      ...currentAnswers,
+      [questionIndex]: answer,
+    }));
+  }
 
   async function getElapsedTime() {
     const currTime = await window.electronAPI.getRemainingTime();
@@ -104,6 +113,27 @@ function App() {
               </button>
             </div>
           </header>
+
+          <section className="question-card">
+            <h2>
+              Question {questionIndex + 1} of {questions.length}
+            </h2>
+            <p>{questions[questionIndex].prompt}</p>
+            <div role="radiogroup" aria-label={questions[questionIndex].prompt}>
+              {questions[questionIndex].options.map((option) => (
+                <label className="option-row" key={option}>
+                  <input
+                    type="radio"
+                    name={`question-${questionIndex}`}
+                    value={option}
+                    checked={answers[questionIndex] === option}
+                    onChange={() => selectAnswer(option)}
+                  />
+                  <span>{option}</span>
+                </label>
+              ))}
+            </div>
+          </section>
         </div>
       </main>
     );
