@@ -3,6 +3,8 @@ const {
   app,
   ipcMain,
   dialog,
+  systemPreferences,
+  shell,
 } = require("electron");
 const path = require("path");
 const fs = require('fs');
@@ -25,6 +27,26 @@ function createWindow() {
 
 ipcMain.handle("full-screen", () => {
   win.kiosk = true;
+});
+
+ipcMain.handle("request-camera-access", async () => {
+  if (process.platform !== "darwin") return { granted: true, status: "granted" };
+
+  let status = systemPreferences.getMediaAccessStatus("camera");
+  if (status === "not-determined") {
+    await systemPreferences.askForMediaAccess("camera");
+    status = systemPreferences.getMediaAccessStatus("camera");
+  }
+
+  return { granted: status === "granted", status };
+});
+
+ipcMain.handle("open-camera-settings", async () => {
+  if (process.platform === "darwin") {
+    await shell.openExternal(
+      "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera",
+    );
+  }
 });
 
 let end_time = null;
