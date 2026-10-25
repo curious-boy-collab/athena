@@ -36,6 +36,15 @@ function App() {
     return `${hours}:${minutes}:${seconds}`;
   }
 
+  async function startTest() {
+    const accepted = await window.electronAPI.showExamRules();
+    if (accepted !== 1) return;
+
+    await window.electronAPI.startTest();
+    await getElapsedTime();
+    setStarted(true);
+  }
+
   async function getFullscreen() {
     await window.electronAPI.setFullScreen();
   }
@@ -100,7 +109,7 @@ function App() {
         </div>
 
         <div className="bottom-actions">
-          <button className="btn btn-light-blue" disabled={!cameraReady}>
+          <button onClick={startTest} className="btn btn-light-blue" disabled={!cameraReady}>
             Go To Test
           </button>
           <button className="btn btn-outline">Need Help?</button>
