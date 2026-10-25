@@ -1,0 +1,138 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html, body, #root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background: #f5f4f2;
+  color: #282828;
+}
+
+.page-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header-section h1 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #242424;
+  margin-bottom: 6px;
+}
+
+.header-section p {
+  font-size: 17px;
+  font-weight: 400;
+  color: #333333;
+}
+
+.card-container {
+  width: 100%;
+  max-width: 920px;
+  background: #ffffff;
+  border: 1px solid #e7e4df;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.025);
+}
+
+.permission-item {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  column-gap: 26px;
+  padding: 44px 48px;
+}
+
+.permission-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+  color: #464646;
+  font-size: 22px;
+}
+
+.permission-content {
+  text-align: left;
+}
+
+.permission-content h3 {
+  font-size: 21px;
+  font-weight: 600;
+  color: #2b2b2b;
+  margin-bottom: 10px;
+}
+
+.permission-content p {
+  font-size: 15px;
+  color: #666666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.divider {
+  height: 1px;
+  background: #ebe9e5;
+  margin-left: 48px;
+  margin-right: 48px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-dark {
+  background: #263c53;
+  color: white;
+}
+
+.btn-dark:hover {
+  background: #1f3246;
+}
+
+.btn-light-blue {
+  background: #7eb5e9;
+  color: white;
+}
+
+.btn-light-blue:hover {
+  background: #6ca8df;
+}
+
+.btn-outline {
+  background: white;
+  border: 1px solid #d9d6d1;
+  color: #333333;
+}
+
+.btn-outline:hover {
+  background: #faf9f7;
+}
