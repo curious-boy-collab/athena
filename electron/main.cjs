@@ -1,4 +1,4 @@
-const { BrowserWindow, app, ipcMain } = require("electron");
+const { BrowserWindow, app, ipcMain, dialog } = require("electron");
 const path = require("path");
 
 let win = null;
@@ -30,6 +30,24 @@ ipcMain.handle("start-test", () => {
 ipcMain.handle("get-time", () => {
   return end_time === null ? 0 : Math.max(0, end_time - Date.now());
 });
+
+ipcMain.handle("show-rules", async () => {
+  const res = await dialog.showMessageBox(win, {
+    type: "info",
+    title: "Exam rules",
+    message: "Please follow these things:",
+    detail: `
+    1. Do not open any new tab
+    2. You will get 0 marks if you cheat
+    3. Camera snapshots will be captured every 4 seconds and stored locally
+    `,
+    buttons: ["Cancel", "Accept"],
+    defaultId: 0
+  });
+
+  return res.response;
+});
+
 
 app.whenReady().then(() => {
   createWindow();
