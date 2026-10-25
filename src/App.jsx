@@ -1,6 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
+const questions = [
+  {
+    prompt: "Which planet is known as the Red Planet?",
+    options: ["Venus", "Mars", "Jupiter", "Mercury"],
+    answer: "Mars",
+  },
+  {
+    prompt: "What is the largest ocean on Earth?",
+    options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+    answer: "Pacific Ocean",
+  },
+  {
+    prompt: "How many sides does a hexagon have?",
+    options: ["Five", "Six", "Seven", "Eight"],
+    answer: "Six",
+  },
+  {
+    prompt: "Which gas do plants absorb from the atmosphere?",
+    options: ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"],
+    answer: "Carbon dioxide",
+  },
+];
+
 function App() {
   const videoRef = useRef(null);
   const [cameraReady, setCameraReady] = useState(false);
