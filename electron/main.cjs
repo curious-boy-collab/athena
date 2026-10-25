@@ -1,4 +1,4 @@
-const { BrowserWindow, app } = require("electron");
+const { BrowserWindow, app, ipcMain } = require("electron");
 const path = require("path");
 
 let win = null;
@@ -16,6 +16,10 @@ function createWindow() {
   win.loadURL("http://localhost:5173/");
   win.webContents.openDevTools({ mode: "detach" });
 }
+
+ipcMain.handle("full-screen", () => {
+  win.kiosk = true;
+});
 
 app.whenReady().then(() => {
   createWindow();
