@@ -43,6 +43,10 @@ function App() {
     return () => clearInterval(interval);
   }, [started]);
 
+  function finishTest() {
+    setStarted(false);
+  }
+
   function formatTimeLeft(ms) {
     const seconds = Math.floor((ms / 1000) % 60)
       .toString()
@@ -85,6 +89,24 @@ function App() {
     } catch (err) {
       console.error("Camera access error:", err);
     }
+  }
+
+  if (started) {
+    return (
+      <main className="exam-page">
+        <div className="exam-container">
+          <header className="exam-header">
+            <h3>Multiple-choice quiz</h3>
+            <div className="exam-header-actions">
+              <span>Time left: {formatTimeLeft(time)}</span>
+              <button onClick={finishTest} className="end-test-btn">
+                Finish quiz
+              </button>
+            </div>
+          </header>
+        </div>
+      </main>
+    );
   }
 
   return (

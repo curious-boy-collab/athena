@@ -173,3 +173,47 @@ body {
   cursor: not-allowed;
   transform: none;
 }
+
+.exam-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f4f2;
+  padding: 48px 40px;
+}
+
+.exam-container {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.exam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.exam-header h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333333;
+}
+
+.exam-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #555555;
+}
+
+.end-test-btn {
+  padding: 11px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #263c53;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
