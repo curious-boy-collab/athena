@@ -74,6 +74,53 @@ function App() {
     return `${hours}:${minutes}:${seconds}`;
   }
 
+  async function clickPhoto() {
+    const video = videoRef.current;
+    if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+      throw new Error("Camera video is not ready yet.");
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Could not create an image from the camera.");
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (imageBlob) => {
+          if (imageBlob) resolve(imageBlob);
+          else reject(new Error("Could not capture an image from the camera."));
+        },
+        "image/jpeg",
+        0.9,
+      );
+    });
+    return blob;
+  }
+
+  useEffect(() => {
+    if (!started || !cameraReady) return;
+
+    let timeoutId;
+    let cancelled = false;
+    const capture = async () => {
+      try {
+        await clickPhoto();
+      } catch (error) {
+        // error handling
+      }
+      if (!cancelled) timeoutId = setTimeout(capture, 4000);
+    };
+    timeoutId = setTimeout(capture, 4000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [started, cameraReady]);
+
   async function startTest() {
     const accepted = await window.electronAPI.showExamRules();
     if (accepted !== 1) return;
