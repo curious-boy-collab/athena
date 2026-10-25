@@ -284,3 +284,7 @@ body {
   background: #c2c7cd;
   cursor: not-allowed;
 }
+
+.result-card .end-test-btn {
+  margin-top: 20px;
+}

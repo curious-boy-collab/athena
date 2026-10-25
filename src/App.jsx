@@ -31,6 +31,7 @@ function App() {
   const [started, setStarted] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
   function selectAnswer(answer) {
     setAnswers((currentAnswers) => ({
@@ -53,6 +54,7 @@ function App() {
   }, [started]);
 
   function finishTest() {
+    setSubmitted(true);
     setStarted(false);
   }
 
@@ -100,20 +102,45 @@ function App() {
     }
   }
 
-  if (started) {
+  if (started || submitted) {
+    const question = questions[questionIndex];
+    const score = questions.reduce(
+      (total, item, index) => total + (answers[index] === item.answer ? 1 : 0),
+      0,
+    );
     return (
       <main className="exam-page">
         <div className="exam-container">
           <header className="exam-header">
-            <h3>Multiple-choice quiz</h3>
-            <div className="exam-header-actions">
+            <h3>{submitted ? "Quiz complete" : "Multiple-choice quiz"}</h3>
+            {!submitted && (
+              <div className="exam-header-actions">
               <span>Time left: {formatTimeLeft(time)}</span>
               <button onClick={finishTest} className="end-test-btn">
                 Finish quiz
               </button>
             </div>
+                        </div>
+            )}
           </header>
 
+          {submitted ? (
+            <section className="question-card result-card">
+              <h2>Your result</h2>
+              <p>
+                You scored {score} out of {questions.length}.
+              </p>
+              <button
+                className="end-test-btn"
+                onClick={() => {
+                  setSubmitted(false);
+                  setStarted(false);
+                }}
+              >
+                Back to setup
+              </button>
+            </section>
+          ) : (
           <section className="question-card">
             <h2>
               Question {questionIndex + 1} of {questions.length}
@@ -149,6 +176,7 @@ function App() {
               )}
             </div>
           </section>
+          )}
         </div>
       </main>
     );
