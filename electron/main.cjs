@@ -1,5 +1,11 @@
-const { BrowserWindow, app, ipcMain, dialog } = require("electron");
+const {
+  BrowserWindow,
+  app,
+  ipcMain,
+  dialog,
+} = require("electron");
 const path = require("path");
+const fs = require('fs');
 
 let win = null;
 
@@ -48,6 +54,14 @@ ipcMain.handle("show-rules", async () => {
   return res.response;
 });
 
+ipcMain.handle("save-photo", (_, arrayBuffer) => {
+  const cameraFeedDirectory = path.join(app.getPath("userData"), "cameraFeed");
+  fs.mkdirSync(cameraFeedDirectory, { recursive: true });
+  const filePath = path.join(cameraFeedDirectory, `${Date.now()}.jpeg`);
+  const buffer = Buffer.from(arrayBuffer);
+  fs.writeFileSync(filePath, buffer);
+  return { filePath, directory: cameraFeedDirectory };
+});
 
 app.whenReady().then(() => {
   createWindow();

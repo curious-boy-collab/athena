@@ -32,6 +32,8 @@ function App() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [captureMessage, setCaptureMessage] = useState("");
+  const [captureDirectory, setCaptureDirectory] = useState("");
 
   function selectAnswer(answer) {
     setAnswers((currentAnswers) => ({
@@ -97,7 +99,10 @@ function App() {
         0.9,
       );
     });
-    return blob;
+    const buffer = await blob.arrayBuffer();
+    const savedPhoto = await window.electronAPI.savePhoto(buffer);
+    setCaptureDirectory(savedPhoto.directory);
+    setCaptureMessage(`Latest camera snapshot saved at ${savedPhoto.filePath}`);
   }
 
   useEffect(() => {
@@ -109,7 +114,9 @@ function App() {
       try {
         await clickPhoto();
       } catch (error) {
-        // error handling
+        if (!cancelled) {
+          setCaptureMessage(`Could not save camera snapshot: ${error.message}`);
+        }
       }
       if (!cancelled) timeoutId = setTimeout(capture, 4000);
     };

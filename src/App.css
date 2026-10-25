@@ -288,3 +288,10 @@ body {
 .result-card .end-test-btn {
   margin-top: 20px;
 }
+
+.capture-status {
+  margin-top: 16px;
+  color: #555555;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
